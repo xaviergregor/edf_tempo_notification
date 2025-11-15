@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  tempo-edf:
+    image: python:3.11-slim
+    container_name: tempo-edf-notifier
+    environment:
+      - TZ=Europe/Paris
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+    env_file:
+      - .env
+    restart: "no"
+    network_mode: bridge
+    working_dir: /app
+    volumes:
+      - ./app:/app
+    command: >
+      sh -c "pip install --no-cache-dir requests &&
+             python3 /app/tempo_notifier.py"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# Utilisation:
+# 1. Créer un dossier 'app' et y placer tempo_notifier.py
+# 2. Configurer le fichier .env avec vos identifiants Telegram
+# 3. Lancer: docker-compose up
+#
+# Pour automatiser avec cron:
+# 0 7 * * * cd /chemin/vers/dossier && docker-compose up
+#
+# Note: tempo_notifier.py est la version complète avec info aujourd'hui + demain
